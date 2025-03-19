@@ -29,6 +29,7 @@ const Shop: React.FC = () => {
             <div
               key={product.id}
               className="bg-white rounded-lg shadow-xl overflow-hidden hover:shadow-2xl transform hover:scale-105 transition-transform duration-300"
+              
             >
               <img
                 src={product.image}

@@ -5,6 +5,7 @@ interface Product {
   name: string;
   price: number;
   description: string;
+  image?: string;
 }
 
 const AdminPage: React.FC = () => {
@@ -12,12 +13,27 @@ const AdminPage: React.FC = () => {
   const [productName, setProductName] = useState('');
   const [productPrice, setProductPrice] = useState(0);
   const [productDescription, setProductDescription] = useState('');
+  const [productImage, setProductImage] = useState<string>('');
+  const [imagePreview, setImagePreview] = useState<string>('');
 
   // Load products from localStorage on component mount
   useEffect(() => {
     const storedProducts = JSON.parse(localStorage.getItem('products') || '[]');
     setProducts(storedProducts);
   }, []);
+
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file && file.type.startsWith('image/')) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const base64String = reader.result as string;
+        setProductImage(base64String);
+        setImagePreview(base64String);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
 
   const handleAddProduct = (e: React.FormEvent) => {
     e.preventDefault();
@@ -28,6 +44,7 @@ const AdminPage: React.FC = () => {
         name: productName,
         price: productPrice,
         description: productDescription,
+        image: productImage
       };
 
       // Update local state
@@ -41,6 +58,8 @@ const AdminPage: React.FC = () => {
       setProductName('');
       setProductPrice(0);
       setProductDescription('');
+      setProductImage('');
+      setImagePreview('');
     }
   };
 
@@ -89,6 +108,19 @@ const AdminPage: React.FC = () => {
               rows={3}
             />
           </div>
+          <div className="mb-4">
+            <input
+              type="file"
+              accept="image/*"
+              onChange={handleImageChange}
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+            {imagePreview && (
+              <div className="mt-2">
+                <img src={imagePreview} alt="Preview" className="w-32 h-32 object-cover rounded-lg" />
+              </div>
+            )}
+          </div>
           <button
             type="submit"
             className="w-full bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600 transition duration-300"
@@ -110,6 +142,9 @@ const AdminPage: React.FC = () => {
                   <h3 className="font-bold text-lg">{product.name}</h3>
                   <p className="text-gray-600">Price: ₹{product.price}</p>
                   <p className="text-gray-600">{product.description}</p>
+                  {product.image && (
+                    <img src={product.image} alt={product.name} className="w-32 h-32 object-cover rounded-lg mt-2" />
+                  )}
                 </div>
                 <button
                   onClick={() => handleDeleteProduct(product.id)}
